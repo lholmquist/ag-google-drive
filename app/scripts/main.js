@@ -5,6 +5,7 @@ window.localStorage.removeItem('ag-oauth2-1038594593085.apps.googleusercontent.c
 var pipeline, filesPipe, authWindow, timer, authURL, callback,
     authz = AeroGear.Authorization();
 
+// Adding an Authorizer
 authz.add({
     name: "drive",
     settings: {
@@ -15,6 +16,7 @@ authz.add({
     }
 });
 
+// Creating a new Pipeline with the "drive" authorizer
 pipeline = AeroGear.Pipeline( { authorizer: authz.services.drive } );
 pipeline.add([
     {
@@ -28,11 +30,16 @@ pipeline.add([
 filesPipe = pipeline.pipes.files;
 
 function validateResponse( responseFromAuthEndpoint, callback ) {
+    // Once we finish the "dance" we need to parse the query String that is returned to make sure it's ok
+    // Google recommends that we also send another request to a "validate" endpoint,  but that is not in the spec.
+    // This good be part of the library, maybe
+
     authz.services.drive.validate( responseFromAuthEndpoint,{
         success: function( response ) {
             $( ".topcoat-notification.errors" ).hide();
             console.log( response );
             $( "#dance" ).attr( "disabled", "disabled" );
+            // here we are calling the read from earlier
             callback();
         },
         error: function( error ) {
@@ -41,6 +48,8 @@ function validateResponse( responseFromAuthEndpoint, callback ) {
     });
 }
 
+// This code i really DO NOT want to put into AeroGear.js
+// I've noticed that on Mobile Safari,  when you have to also sign into google that the child window is not closed by the parent
 function dance( authURL, callback ) {
     //console.log( authURL );
     //console.log( "Opening Auth URL" );
@@ -72,6 +81,7 @@ function dance( authURL, callback ) {
 function readFilesPipe() {
     $("ul.topcoat-list__container").empty();
     $( ".topcoat-notification.loading" ).show();
+    // Just a normal pipe.read,  using promises
     filesPipe
         .read()
         .then( function( response ){
@@ -88,6 +98,8 @@ function readFilesPipe() {
         })
         .then( null, function( error ) {
             $( "#dance" ).removeAttr( "disabled" );
+            // If the Authz fails, then we will get a url constructed for us, that we need to do something with to Authenticate
+            // It also needs to be user initiated since most browsers will block the window that needs to be opened
             authURL = error.authURL;
             callback = readFilesPipe;
             $( ".topcoat-notification.errors" ).show();

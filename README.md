@@ -2,6 +2,8 @@
 
 This purpose of this repo is to show how to use the OAuth2 adapter in AeroGear.js and how it integrates into Pipeline
 
+Basically, it will ask for your permission for this app to access your google drive account and then list the files you have
+
 after cloning the repo, run:
 
     $ npm install && bower install
