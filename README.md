@@ -6,6 +6,11 @@ after cloning the repo, run:
 
     $ npm install && bower install
 
+Then
+
+    $ grunt server
+
+The web app will then be available at [localhost:9000](http://localhost:9000)
 
 Be sure to also have a Google Account since we are going to access Google Drive
 
