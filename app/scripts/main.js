@@ -93,7 +93,8 @@ function readFilesPipe() {
 
             for( i = 0; i < itemLength; i++ ) {
                 item = items[ i ];
-                putItHere.append( "<li class='topcoat-list__item'><img src='" + item.iconLink + "'> " + item.title );
+                console.log( item.title, item.labels.trashed ? "Trashed" : "" );
+                putItHere.append( "<li class='topcoat-list__item' id='" + item.id + "'><span class='icomatic icon'>delete</span>&nbsp;&nbsp;<img src='" + item.iconLink + "'> " + item.title + ( item.labels.trashed ? " - In Trash" : "" ) );
             }
         })
         .then( null, function( error ) {
@@ -109,6 +110,19 @@ function readFilesPipe() {
         });
 }
 
+// Careful,  this will delete the item from drive,  Duh
+// Does not move to the trash
+// Does not ask if you are certain either
+function deleteItem( itemID ) {
+    filesPipe.remove( itemID )
+        .then( function() {
+            $( "#"+itemID ).remove();
+        })
+        .then( null, function( error ) {
+            console.log( "errors", error );
+        });
+}
+
 
 $( "#list_files" ).on( "click", function() {
     readFilesPipe();
@@ -118,5 +132,15 @@ $( "#dance" ).on( "click", function( events ) {
     var targetValue = events.target.checked;
     if( targetValue ) {
         dance( authURL, callback );
+    }
+});
+
+$( "ul.topcoat-list__container").on( "click", function( events ) {
+    var target = $( events.target ),
+        id;
+
+    if( target.hasClass( "icon" ) ) {
+        id = $(target).closest("li")[0].id;
+        deleteItem( id );
     }
 });
